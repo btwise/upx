@@ -25,10 +25,9 @@
    <markus@oberhumer.com>               <ezerotven+github@gmail.com>
  */
 
-// This file implements the central loop, and it uses class PackMaster to
+// work.cpp implements the central loop, and it uses class PackMaster to
 // dispatch. PackMaster by itself will instatiate a concrete subclass
 // of class Packer which then does the actual work.
-// And see p_com.cpp for a simple executable format.
 
 #include "conf.h"
 #include "file.h"
@@ -74,20 +73,20 @@ void do_one_file(const char *iname, char *oname) {
             throwIOException(iname, errno);
     }
     if (S_ISDIR(st.st_mode))
-        throwIOException("is a directory -- skipped");
+        throwIOException("是一个文件夹 -- 跳过");
     if (!(S_ISREG(st.st_mode)))
-        throwIOException("not a regular file -- skipped");
+        throwIOException("不是常规文件 -- 跳过");
 #if defined(__unix__)
     // no special bits may be set
     if ((st.st_mode & (S_ISUID | S_ISGID | S_ISVTX)) != 0)
         throwIOException("file has special permissions -- skipped");
 #endif
     if (st.st_size <= 0)
-        throwIOException("empty file -- skipped");
+        throwIOException("是空文件 -- 跳过");
     if (st.st_size < 512)
-        throwIOException("file is too small -- skipped");
+        throwIOException("文件太小 -- 跳过");
     if (!mem_size_valid_bytes(st.st_size))
-        throwIOException("file is too large -- skipped");
+        throwIOException("文件太大 -- 跳过");
     if ((st.st_mode & S_IWUSR) == 0) {
         bool skip = true;
         if (opt->output_name)
@@ -97,7 +96,7 @@ void do_one_file(const char *iname, char *oname) {
         else if (opt->backup)
             skip = false;
         if (skip)
-            throwIOException("file is write protected -- skipped");
+            throwIOException("文件写保护 -- 跳过");
     }
 
     InputFile fi;
@@ -118,7 +117,7 @@ void do_one_file(const char *iname, char *oname) {
     if (opt->cmd == CMD_COMPRESS || opt->cmd == CMD_DECOMPRESS) {
         if (opt->to_stdout) {
             if (!fo.openStdout(1, opt->force ? true : false))
-                throwIOException("data not written to a terminal; Use '-f' to force.");
+                throwIOException("数据未写入终端; 请使用 '-f' 参数强制执行.");
         } else {
             char tname[ACC_FN_PATH_MAX + 1];
             if (opt->output_name) {
@@ -133,7 +132,7 @@ void do_one_file(const char *iname, char *oname) {
                 }
             } else {
                 if (!maketempname(tname, sizeof(tname), iname, ".upx"))
-                    throwIOException("could not create a temporary file name");
+                    throwIOException("无法创建临时文件名");
             }
             int flags = O_CREAT | O_WRONLY | O_BINARY;
             if (opt->force_overwrite || opt->force)
@@ -156,7 +155,7 @@ void do_one_file(const char *iname, char *oname) {
         }
     }
 
-    // handle command - actual work is here
+    // handle command
     PackMaster pm(&fi, opt);
     if (opt->cmd == CMD_COMPRESS)
         pm.pack(&fo);
@@ -169,7 +168,7 @@ void do_one_file(const char *iname, char *oname) {
     else if (opt->cmd == CMD_FILEINFO)
         pm.fileInfo();
     else
-        throwInternalError("invalid command");
+        throwInternalError("无效的命令");
 
     // copy time stamp
     if (oname[0] && opt->preserve_timestamp && fo.isOpen()) {
@@ -194,7 +193,7 @@ void do_one_file(const char *iname, char *oname) {
         if (opt->backup) {
             char bakname[ACC_FN_PATH_MAX + 1];
             if (!makebakname(bakname, sizeof(bakname), iname))
-                throwIOException("could not create a backup file name");
+                throwIOException("无法创建备份文件名");
             FileBase::rename(iname, bakname);
         } else {
 #if (HAVE_CHMOD)
@@ -259,7 +258,7 @@ static void unlink_ofile(char *oname) {
         IGNORE_ERROR(r);
 #endif
         if (unlink(oname) == 0)
-            oname[0] = 0; // done with oname
+            oname[0] = 0;
     }
 }
 

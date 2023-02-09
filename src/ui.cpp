@@ -25,9 +25,6 @@
    <markus@oberhumer.com>               <ezerotven+github@gmail.com>
  */
 
-// INFO: not thread-safe; assumes a single UiPacker instance that
-// is exclusively called from main thread
-
 #include "conf.h"
 #include "file.h"
 #include "packer.h"
@@ -94,14 +91,19 @@ unsigned UiPacker::update_fu_len = 0;
 // constants
 **************************************************************************/
 
-static const char header_line1[] = "        File size         Ratio      Format      Name\n";
-static const char header_line2[] = "   --------------------   ------   -----------   -----------\n";
+static const char header_line1[] = "          文件大小         压缩比     格式        名称\n";
+static char header_line2[] = "   --------------------   ------   -----------   -----------\n";
 
-static const char progress_filler[4 + 1] = ".*[]";
+static char progress_filler[4 + 1] = ".*[]";
 
-static void init_global_constants(void) noexcept {
+static void init_global_constants(void) {
 #if 0 && (ACC_OS_DOS16 || ACC_OS_DOS32)
     // FIXME: should test codepage here
+
+    static bool done = false;
+    if (done)
+        return;
+    done = true;
 
 #if 1 && (ACC_OS_DOS32) && defined(__DJGPP__)
     /* check for Windows NT/2000/XP */
@@ -156,8 +158,7 @@ static const char *mkline(upx_uint64_t fu_len, upx_uint64_t fc_len, upx_uint64_t
 **************************************************************************/
 
 UiPacker::UiPacker(const Packer *p_) : ui_pass(0), ui_total_passes(0), p(p_), s(nullptr) {
-    static upx_std_once_flag init_done;
-    upx_std_call_once(init_done, init_global_constants);
+    init_global_constants();
 
     cb.reset();
 
@@ -473,7 +474,7 @@ void UiPacker::uiPackEnd(const OutputFile *fo) {
 
 void UiPacker::uiPackTotal() {
     uiListTotal();
-    uiFooter("Packed");
+    uiFooter("打包了");
 }
 
 /*************************************************************************
@@ -504,7 +505,7 @@ void UiPacker::uiUnpackEnd(const OutputFile *fo) {
 
 void UiPacker::uiUnpackTotal() {
     uiListTotal(true);
-    uiFooter("Unpacked");
+    uiFooter("解包了");
 }
 
 /*************************************************************************
@@ -526,8 +527,8 @@ void UiPacker::uiListEnd() { uiUpdate(); }
 void UiPacker::uiListTotal(bool decompress) {
     if (opt->verbose >= 1 && total_files >= 2) {
         char name[32];
-        upx_safe_snprintf(name, sizeof(name), "[ %u file%s ]", total_files_done,
-                          total_files_done == 1 ? "" : "s");
+        upx_safe_snprintf(name, sizeof(name), "[ %u 个文件%s ]", total_files_done,
+                          total_files_done == 1 ? "" : "");
         con_fprintf(
             stdout, "%s%s\n", header_line2,
             mkline(total_fu_len, total_fc_len, total_u_len, total_c_len, "", name, decompress));
@@ -543,7 +544,7 @@ void UiPacker::uiTestStart() {
     total_files++;
 
     if (opt->verbose >= 1) {
-        con_fprintf(stdout, "testing %s ", p->fi->getName());
+        con_fprintf(stdout, "测试 %s ", p->fi->getName());
         fflush(stdout);
         printSetNl(1);
     }
@@ -551,14 +552,14 @@ void UiPacker::uiTestStart() {
 
 void UiPacker::uiTestEnd() {
     if (opt->verbose >= 1) {
-        con_fprintf(stdout, "[OK]\n");
+        con_fprintf(stdout, "[成功]\n");
         fflush(stdout);
         printSetNl(0);
     }
     uiUpdate();
 }
 
-void UiPacker::uiTestTotal() { uiFooter("Tested"); }
+void UiPacker::uiTestTotal() { uiFooter("测试"); }
 
 /*************************************************************************
 // info
@@ -614,10 +615,10 @@ void UiPacker::uiFooter(const char *t) {
         unsigned n2 = total_files_done;
         unsigned n3 = total_files - total_files_done;
         if (n3 == 0)
-            con_fprintf(stdout, "\n%s %u file%s.\n", t, n1, n1 == 1 ? "" : "s");
+            con_fprintf(stdout, "\n%s %u 个文件%s.\n", t, n1, n1 == 1 ? "" : "");
         else
-            con_fprintf(stdout, "\n%s %u file%s: %u ok, %u error%s.\n", t, n1, n1 == 1 ? "" : "s",
-                        n2, n3, n3 == 1 ? "" : "s");
+            con_fprintf(stdout, "\n%s %u 个文件%s: %u 成功, %u 错误%s.\n", t, n1, n1 == 1 ? "" : "",
+                        n2, n3, n3 == 1 ? "" : "");
     }
 }
 
