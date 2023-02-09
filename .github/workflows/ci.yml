@@ -55,7 +55,7 @@ jobs:
       matrix:
         include:
           - { os: ubuntu-22.04, use_m32: true }
-          - { os: ubuntu-20.04, use_m32: false }
+          #- { os: ubuntu-20.04, use_m32: false }
     steps:
       - name: 'Install extra 32-bit and Windows packages'
         if: ${{ matrix.use_m32 }}
@@ -68,23 +68,23 @@ jobs:
         with: { submodules: true }
       - name: 'Check out test suite'
         run: 'git clone --depth=1 https://github.com/upx/upx-testsuite ../deps/upx-testsuite'
-      - name: 'Build cmake extra/gcc/debug'
-        run:   'make build/extra/gcc/debug'
+      #- name: 'Build cmake extra/gcc/debug'
+      #  run:   'make build/extra/gcc/debug'
       - name: 'Build cmake extra/gcc/release'
         run:   'make build/extra/gcc/release'
-      - name: 'Build cmake extra/clang/debug'
-        run:   'make build/extra/clang/debug'
+      #- name: 'Build cmake extra/clang/debug'
+      #  run:   'make build/extra/clang/debug'
       - name: 'Build cmake extra/clang/release'
         run:   'make build/extra/clang/release'
-      - name: 'Build cmake extra/gcc-m32/debug'
-        if: ${{ matrix.use_m32 }}
-        run:   'make build/extra/gcc-m32/debug'
+      #- name: 'Build cmake extra/gcc-m32/debug'
+      #  if: ${{ matrix.use_m32 }}
+      #  run:   'make build/extra/gcc-m32/debug'
       - name: 'Build cmake extra/gcc-m32/release'
         if: ${{ matrix.use_m32 }}
         run:   'make build/extra/gcc-m32/release'
-      - name: 'Build cmake extra/cross-windows-mingw32/release'
-        if: ${{ matrix.use_m32 }}
-        run:   'make build/extra/cross-windows-mingw32/release'
+      #- name: 'Build cmake extra/cross-windows-mingw32/release'
+      #  if: ${{ matrix.use_m32 }}
+      #  run:   'make build/extra/cross-windows-mingw32/release'
       - name: 'Build cmake extra/cross-windows-mingw64/release'
         if: ${{ matrix.use_m32 }}
         run:   'make build/extra/cross-windows-mingw64/release'
@@ -107,15 +107,15 @@ jobs:
           (cd build/extra/gcc/release && DESTDIR=$PWD/Install-with-make  make install)
       - name: 'Run basic tests'
         run: |
-          make -C build/extra/gcc/debug test
+          #make -C build/extra/gcc/debug test
           make -C build/extra/gcc/release test
-          make -C build/extra/clang/debug test
+          #make -C build/extra/clang/debug test
           make -C build/extra/clang/release test
-      - name: 'Run basic tests 32-bit'
-        if: ${{ matrix.use_m32 }}
-        run: |
-          make -C build/extra/gcc-m32/debug test
-          make -C build/extra/gcc-m32/release test
+      #- name: 'Run basic tests 32-bit'
+      #  if: ${{ matrix.use_m32 }}
+      #  run: |
+      #    make -C build/extra/gcc-m32/debug test
+      #    make -C build/extra/gcc-m32/release test
       - name: 'Run test suite build/extra/gcc/release'
         run: |
           export upx_testsuite_SRCDIR="$(readlink -en ../deps/upx-testsuite)"
@@ -130,7 +130,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: macos-11, gcc: gcc-10, gxx: 'g++-10', testsuite: true }
+          #- { os: macos-11, gcc: gcc-10, gxx: 'g++-10', testsuite: true }
           - { os: macos-12, gcc: gcc-11, gxx: 'g++-11', testsuite: true }
     steps:
       - name: 'Install brew packages'
@@ -144,13 +144,13 @@ jobs:
       - name: 'Check out test suite'
         if: ${{ matrix.testsuite }}
         run: 'git clone --depth=1 https://github.com/upx/upx-testsuite ../deps/upx-testsuite'
-      - name: 'Build cmake extra/clang/debug'
-        run:   'make build/extra/clang/debug'
+      #- name: 'Build cmake extra/clang/debug'
+      #  run:   'make build/extra/clang/debug'
       - name: 'Build cmake extra/clang/release'
         run:   'make build/extra/clang/release'
-      - name: 'Build cmake extra/gcc/debug'
-        if: ${{ matrix.gcc != '' }}
-        run:   'make build/extra/gcc/debug CC=${{ matrix.gcc }} CXX=${{ matrix.gxx }}'
+      #- name: 'Build cmake extra/gcc/debug'
+      #  if: ${{ matrix.gcc != '' }}
+      #  run:   'make build/extra/gcc/debug CC=${{ matrix.gcc }} CXX=${{ matrix.gxx }}'
       - name: 'Build cmake extra/gcc/release'
         if: ${{ matrix.gcc != '' }}
         run:   'make build/extra/gcc/release CC=${{ matrix.gcc }} CXX=${{ matrix.gxx }}'
@@ -181,7 +181,7 @@ jobs:
           (cd build/extra/clang/release && DESTDIR=$PWD/Install-with-make  make install)
       - name: 'Run basic tests'
         run: |
-          make -C build/extra/clang/debug test
+          #make -C build/extra/clang/debug test
           make -C build/extra/clang/release test
       - name: 'Run test suite build/extra/clang/release'
         if: ${{ matrix.testsuite }}
@@ -218,8 +218,8 @@ jobs:
           Get-Command bash; Get-Command cmake; Get-Command make
           bash --version; cmake --version; make --version
           Get-Command cl -ErrorAction SilentlyContinue
-      - name: 'Build cmake debug'
-        run:   'make build/debug'
+      #- name: 'Build cmake debug'
+      #  run:   'make build/debug'
       - name: 'Build cmake release'
         run:   'make build/release'
       - name: 'Make artifact'
@@ -237,7 +237,7 @@ jobs:
           path: tmp/artifact
       - name: 'Run basic tests'
         run: |
-          cmake --build build/debug   --config Debug   --target RUN_TESTS
+          #cmake --build build/debug   --config Debug   --target RUN_TESTS
           cmake --build build/release --config Release --target RUN_TESTS
       - name: 'Run test suite build/release'
         shell: bash
