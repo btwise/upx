@@ -1288,7 +1288,7 @@ int upx_main(int argc, char *argv[]) {
             FILE *f = stdout;
             int fg = con_fg(f, FG_RED);
             con_fprintf(
-                f, "\n警告:这是一个自编译版本 - 请测试使用! \n");
+               f, "\nWARNING: this is an unstable beta version - use for testing only! Really.\n");
             fg = con_fg(f, fg);
             UNUSED(fg);
         }
